@@ -21,6 +21,7 @@ class ConsultoresController extends Controller
             ->join('permissao_sistema', 'cao_usuario.co_usuario', '=', 'permissao_sistema.co_usuario')
             ->where('permissao_sistema.co_sistema', '=', 1)
             ->whereIn('permissao_sistema.co_tipo_usuario', array(0, 1, 2))
+            ->orderBy('no_usuario', 'ASC')
             ->get();
 
         return response()->json(['consultores' => $consultores], 200);
@@ -93,44 +94,49 @@ class ConsultoresController extends Controller
         //
     }
 
-
-    public function getRelatorio($periodo, $co_usuario)
+    public function get_relatorio(Request $request)
     {
-        $date_explode = explode('-', $periodo);
+        $periodos = json_decode($request['periodos']);
+        $consultores = json_decode($request['consultores']);
 
-        $receita_liquida = DB::table('cao_fatura')
+        for($i=0; $i < count($consultores); $i++){
+            for($j=0; $j < count($periodos); $j++){
+                $date_explode = explode('-', $periodos[$j]->periodo_num);
+
+                $query = DB::table('cao_fatura')
                 ->join('cao_os', 'cao_fatura.co_os', '=', 'cao_os.co_os')
-                ->where('cao_os.co_usuario', '=', $co_usuario)
+                ->where('cao_os.co_usuario', '=', $consultores[$i]->co_usuario)
                 ->whereYear('cao_fatura.data_emissao', $date_explode[0])
                 ->whereMonth('cao_fatura.data_emissao', $date_explode[1]);
 
-        $valor = $receita_liquida->sum('cao_fatura.valor');
-        $comissao_cn = $receita_liquida->avg('cao_fatura.comissao_cn');
-        $total_imp_inc = $receita_liquida->avg('cao_fatura.total_imp_inc');
+                $receita_liquida[$i][$j] = round($query->sum('cao_fatura.valor'), 2);
+                $comissao_cn[$i][$j] = $query->sum('cao_fatura.comissao_cn');
+                $total_imp_inc[$i][$j] = $query->sum('cao_fatura.total_imp_inc');
 
-        $custo_fixo = DB::table('cao_salario')
-                ->where('co_usuario', '=', $co_usuario)
+                $custo = DB::table('cao_salario')
+                ->where('co_usuario', '=', $consultores[$i]->co_usuario)
                 ->get('brut_salario');
-        
-        if(count($custo_fixo) > 0)
-            $cf = round($custo_fixo[0]->brut_salario, 2);
-        else
-            $cf = 0;
 
-        $comissao = ($valor - ($valor * ($total_imp_inc/100))) * ($comissao_cn/100);
-        $lucro = $valor - $cf - $comissao;
+                if(count($custo) > 0)
+                    $custo_fixo[$i][$j] = round($custo[0]->brut_salario, 2);
+                else
+                    $custo_fixo[$i][$j] = 0;
 
-        $libro = new \stdClass();
-        $arreglo_datos = [];
+                $comissao[$i][$j] = round(($receita_liquida[$i][$j] - ($receita_liquida[$i][$j] * ($total_imp_inc[$i][$j]/100))) * ($comissao_cn[$i][$j]/100), 2);
+                $lucro[$i][$j] = round($receita_liquida[$i][$j] - $custo_fixo[$i][$j] - $comissao[$i][$j], 2);
 
-        $arreglo_datos = array(
-            'receita_liquida' => round($valor, 2),
-            'custo_fixo' => $cf,
-            'comissao' => round($comissao, 2),
-                    'lucro' => round($lucro, 2)
-        );
 
-        return response()->json(['datos_relatorio' => $arreglo_datos], 200);
+            }
+
+        }
+
+        return response()->json(['datos_relatorio'    => $consultores, 
+                                    'receita_liquida' => $receita_liquida,
+                                    'periodos'        => $periodos,
+                                    'custo_fixo'      => $custo_fixo,
+                                    'comissao'        => $comissao,
+                                    'lucro'           => $lucro,
+                                ], 200);
 
     }
 }

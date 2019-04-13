@@ -16,4 +16,4 @@ Route::get('/', function () {
 });
 
 Route::resource('consultores', 'ConsultoresController');
-Route::get('relatorio/{periodo}/{co_usuario}', 'ConsultoresController@getRelatorio');
+Route::post('get_relatorio', 'ConsultoresController@get_relatorio');

@@ -152,7 +152,7 @@
     </v-container>
     <v-container >
       <template >
-        <v-layout row v-for="(item, index) in consultores_seleccionados" :key="index"> 
+        <v-layout row v-for="(item, index) in relatorio_total" :key="index"> 
           <v-flex xs12 lg12 sm12 offset-lg0>
             <v-card v-if="showTable == true" class="mb-4">
               <v-card-title>
@@ -162,7 +162,7 @@
                 </v-card-title>
               <div>
                 <!--Table-->
-                <table id="tablePreview" class="table table-striped table-hover table-sm table-bordered">
+                <table id="tablePreview" class="table table-hover table-striped table-sm table-bordered">
                 <!--Table head-->
                   <thead>
                     <tr>
@@ -176,12 +176,19 @@
                     <!--Table head-->
                     <!--Table body-->
                   <tbody>
-                  <tr v-for="(itemReceita, i) in myData" :key="i" >
-                    <td v-if="myData[i][0] == item.co_usuario">{{ myData[i][1] }}</td>
-                    <td align="right" v-if="myData[i][0] == item.co_usuario"> R$ {{ myData[i][2].receita_liquida }}</td>
-                    <td align="right" v-if="myData[i][0] == item.co_usuario"> R$ {{ myData[i][2].custo_fixo }}</td>
-                    <td align="right" v-if="myData[i][0] == item.co_usuario"> R$ {{ myData[i][2].comissao }}</td>
-                    <td align="right" v-if="myData[i][0] == item.co_usuario"> R$ {{ myData[i][2].lucro }}</td>
+                  <tr v-for="(itemMes, i) in periodos" :key="i">
+                    <td >{{ formatDate(itemMes.periodo_num) }}</td>
+                    <td align="right" > R$ {{ receita_l[index][i] }}</td>
+                    <td align="right" > R$ {{ custo_fixo[index][i] }}</td>
+                    <td align="right" > R$ {{ comissao[index][i] }}</td>
+                    <td align="right" > R$ {{ lucro[index][i] }}</td>
+                  </tr>
+                  <tr>
+                    <td align="left">Totales</td>
+                    <td align="right">{{  suma(receita_l[index]) }}</td>
+                    <td align="right">{{  suma(custo_fixo[index]) }}</td>
+                    <td align="right">{{  suma(comissao[index]) }}</td>
+                    <td align="right">{{  suma(lucro[index]) }}</td>
                   </tr>
                  </tbody>
                   <!--Table body-->
@@ -196,7 +203,6 @@
   </div>
 
 </template>
-
 
 <script>
     import moment from 'moment'
@@ -232,30 +238,25 @@
           myData: [],
           resp: {},
           value: null,
-          flag: null
+          relatorio_total: [],
+          receita_l: [],
+          periodos: [],
+          custo_fixo: [],
+          comissao: [],
+          lucro: []
 
         }
       },
       methods: {
         passLeft(co_usuario, no_usuario, index){
-          if(this.showTable == true){
-            this.showTable = false
-          }
           this.consultores.splice(index, 1);
           this.consultores_seleccionados.unshift({co_usuario: co_usuario, no_usuario: no_usuario})
         },
         passRight(co_usuario, no_usuario, index){
-          if(this.showTable == true){
-            this.showTable = false
-          }
-
           this.consultores_seleccionados.splice(index, 1)
           this.consultores.unshift({co_usuario: co_usuario, no_usuario: no_usuario})
         },
         todosLeft(){
-          if(this.showTable == true){
-            this.showTable = false
-          }
           if(this.consultores_seleccionados.length === 0){
             this.consultores_seleccionados = this.consultores
             this.consultores = []
@@ -266,9 +267,6 @@
           }
         },
         todosRight(){
-          if(this.showTable == true){
-            this.showTable = false
-          }
           if(this.consultores.length === 0){
             this.consultores = this.consultores_seleccionados
             this.consultores_seleccionados = []
@@ -297,16 +295,26 @@
               if (endDate.isBefore(startDate)) {
                 alert('La fecha final no puede ser mayor que la inicial')
               }else{
+
+                axios
+              .post('/get_relatorio',{
+                consultores: JSON.stringify(this.consultores_seleccionados),
+                periodos: JSON.stringify(this.meses)
+              })
+              .then(response => {
+                console.log(response.data)
+                this.relatorio_total = response.data.datos_relatorio
+                this.receita_l = response.data.receita_liquida
+                this.periodos = response.data.periodos
+                this.custo_fixo = response.data.custo_fixo
+                this.comissao = response.data.comissao
+                this.lucro = response.data.lucro
+              })
+              .catch(error => {
+                console.log(error)
+              })
+
                 if(this.showTable == false){
-                  this.consultores_seleccionados.forEach((usuario, index) => {
-
-                    this.meses.forEach((element, i) => {
-                    var periodo = element.periodo_num
-                    
-                    this.getPromise(usuario.co_usuario, periodo)
-
-                      });
-                  });
                   this.showTable = true
                 }
               }
@@ -317,27 +325,17 @@
           else
             alert("Debe Seleccionar un consultor")
         },
-          async getData(co_usuario, periodo_num){
-              await axios
-              .get(`/relatorio/${periodo_num}/${co_usuario}`)
-              .then(response => {
-                this.resp = response.data.datos_relatorio
-
-              })
-              .catch(error => {
-                console.log(error)
-              })
-               return this.resp
-
+        formatDate(fecha){
+            return moment(fecha).format('MMMM-YYYY').toUpperCase()
         },
-        getPromise(co_usuario, periodo_num){
-          
-          let that = this
+        suma(arreglo){
+          const sum = arreglo.reduce(add);
 
-          this.getData(co_usuario, periodo_num).then(function(defs){
-          that.myData.push([co_usuario, moment(periodo_num).format('MMMM-YYYY').toUpperCase() , defs]);
-                    
-          });
+          function add(accumulator, a) {
+              return parseFloat(accumulator) + parseFloat(a);
+          }
+
+          return sum.toFixed(2)
         }
       }
     }
