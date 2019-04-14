@@ -145,14 +145,21 @@ class ConsultoresController extends Controller
         $periodos = json_decode($request['periodos']);
         $consultores = json_decode($request['consultores']);
 
-        //var_dump($periodos);
+        $position = count($periodos);
+
+        $date_explode = explode('-', $periodos[$position - 1]->periodo_num);
+
+        $last_day = date("d",(mktime(0,0,0,$date_explode[1]+1,1,$date_explode[0])-1));
+        
+        $first_date = $periodos[0]->periodo_num.'-01';
+        $last_date = $periodos[$position - 1]->periodo_num.'-'.$last_day;
 
         for($i=0; $i < count($consultores); $i++){
 
                 $query = DB::table('cao_fatura')
                 ->join('cao_os', 'cao_fatura.co_os', '=', 'cao_os.co_os')
                 ->where('cao_os.co_usuario', '=', $consultores[$i]->co_usuario)
-                ->whereBetween('cao_fatura.data_emissao', ['2007-01-01', '2007-12-30']);
+                ->whereBetween('cao_fatura.data_emissao', [$first_date, $last_date]);
 
                 $receita_liquida[$i] = round($query->sum('cao_fatura.valor'), 2);
                 $total_imp_inc[$i] = round($query->sum('cao_fatura.total_imp_inc')/100);
@@ -176,8 +183,6 @@ class ConsultoresController extends Controller
         for($i=0; $i < count($porcentaje); $i++){
                 $porcentaje[$i] = round($porcentaje[$i], 2);
         }
-
-        //var_dump($porcentaje);
 
         return response()->json(['porcentaje'  => $porcentaje], 200);
 

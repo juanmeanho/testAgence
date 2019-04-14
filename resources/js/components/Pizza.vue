@@ -60,6 +60,8 @@
                 return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
           },
           showPie(meses, showChart){
+          console.log('length',meses)
+
             this.showChart = showChart
 
             if(showChart){
@@ -95,6 +97,7 @@
                 this.porcentaje = []
                 this.colors = []
                 this.seleccionados = []
+                
 
                 }) 
             }

@@ -253,10 +253,13 @@
       },
       methods: {
         showPizza(){
+          this.meses = []
           if(this.consultores_seleccionados != 0){
             if(this.date_desde != '' && this.date_hasta != ''){
               var startDate = moment(this.date_desde);
               var endDate = moment(this.date_hasta);
+
+              endDate.add(1,'month')
 
               while (startDate.isBefore(endDate)) {
                 this.meses.push({'periodo_num' : startDate.format("YYYY-MM")});
@@ -269,6 +272,7 @@
               else{
                   this.$refs.pizza.showPie(this.meses, true)
                   this.showTable = false
+
               }
             }else{
               alert("Debe seleccionar un periodo de consulta")
@@ -317,6 +321,8 @@
 
               var startDate = moment(this.date_desde);
               var endDate = moment(this.date_hasta);
+
+              endDate.add(1,'month')
             
               while (startDate.isBefore(endDate)) {
                 this.meses.push({'periodo_num' : startDate.format("YYYY-MM")});
