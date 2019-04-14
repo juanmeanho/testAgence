@@ -139,4 +139,47 @@ class ConsultoresController extends Controller
                                 ], 200);
 
     }
+
+    public function get_pizza_data(Request $request)
+    {
+        $periodos = json_decode($request['periodos']);
+        $consultores = json_decode($request['consultores']);
+
+        //var_dump($periodos);
+
+        for($i=0; $i < count($consultores); $i++){
+
+                $query = DB::table('cao_fatura')
+                ->join('cao_os', 'cao_fatura.co_os', '=', 'cao_os.co_os')
+                ->where('cao_os.co_usuario', '=', $consultores[$i]->co_usuario)
+                ->whereBetween('cao_fatura.data_emissao', ['2007-01-01', '2007-12-30']);
+
+                $receita_liquida[$i] = round($query->sum('cao_fatura.valor'), 2);
+                $total_imp_inc[$i] = round($query->sum('cao_fatura.total_imp_inc')/100);
+
+
+                $total[$i] = $receita_liquida[$i] - $total_imp_inc[$i];
+                
+
+        }
+
+
+        $valor_total = array_sum($total);
+
+        for($i=0; $i < count($total); $i++){
+            if($valor_total != 0)
+                $porcentaje[$i] = ($receita_liquida[$i]*100)/$valor_total;
+            else
+                $porcentaje[$i] = 0;
+        }
+
+        for($i=0; $i < count($porcentaje); $i++){
+                $porcentaje[$i] = round($porcentaje[$i], 2);
+        }
+
+        //var_dump($porcentaje);
+
+        return response()->json(['porcentaje'  => $porcentaje], 200);
+
+    }
 }

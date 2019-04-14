@@ -141,7 +141,7 @@
                   Gráfico
                 <v-icon right>mdi-chart-areaspline</v-icon>
               </v-btn>
-              <v-btn color="success" dark @click=" ">
+              <v-btn color="success" dark @click="showPizza()">
                   Pizza
                 <v-icon right>mdi-chart-pie</v-icon>
               </v-btn>
@@ -151,10 +151,10 @@
       </v-layout>
     </v-container>
     <v-container >
-      <template >
+      <template ><!-- Inicio Tablas-->
         <v-layout row v-for="(item, index) in relatorio_total" :key="index"> 
           <v-flex xs12 lg12 sm12 offset-lg0>
-            <v-card v-if="showTable == true" class="mb-4">
+            <v-card v-show="showTable" class="mb-4">
               <v-card-title>
                 <div>
                   <h3 class="subheading "><v-icon small left>mdi-account</v-icon>{{ item.no_usuario }}</h3>
@@ -198,7 +198,9 @@
             </v-card>
           </v-flex>
         </v-layout>
-      </template>
+      </template><!-- Fin Tablas Tablas-->
+            <pizza :consultores_seleccionados="consultores_seleccionados" ref="pizza">
+            </pizza>
     </v-container>
   </div>
 
@@ -206,6 +208,8 @@
 
 <script>
     import moment from 'moment'
+    import Chart from 'chart.js'
+
     import 'moment/locale/es'  
     moment.locale('es')
 
@@ -220,6 +224,7 @@
                 console.log(error)
                 this.errored = true
               })
+
         },
         data () {
         return {
@@ -236,18 +241,42 @@
           meses: [],
           relatorio: [],
           myData: [],
-          resp: {},
           value: null,
           relatorio_total: [],
           receita_l: [],
           periodos: [],
           custo_fixo: [],
           comissao: [],
-          lucro: []
+          lucro: [],
 
         }
       },
       methods: {
+        showPizza(){
+          if(this.consultores_seleccionados != 0){
+            if(this.date_desde != '' && this.date_hasta != ''){
+              var startDate = moment(this.date_desde);
+              var endDate = moment(this.date_hasta);
+
+              while (startDate.isBefore(endDate)) {
+                this.meses.push({'periodo_num' : startDate.format("YYYY-MM")});
+                startDate.add(1, 'month');
+              }
+              
+              if (endDate.isBefore(startDate)) {
+                  alert('La fecha final no puede ser mayor que la inicial')
+              }
+              else{
+                  this.$refs.pizza.showPie(this.meses, true)
+                  this.showTable = false
+              }
+            }else{
+              alert("Debe seleccionar un periodo de consulta")
+            }
+
+          }else
+            alert('Debe seleccionar un consultor')
+        },
         passLeft(co_usuario, no_usuario, index){
           this.consultores.splice(index, 1);
           this.consultores_seleccionados.unshift({co_usuario: co_usuario, no_usuario: no_usuario})
@@ -279,7 +308,9 @@
         showRelatorio(){
 
           this.meses = []
-          this.myData = []
+          this.showPie = false
+          this.$refs.pizza.showPie(null, false)
+
 
           if(this.consultores_seleccionados != 0){
             if(this.date_desde != '' && this.date_hasta != ''){
@@ -302,7 +333,6 @@
                 periodos: JSON.stringify(this.meses)
               })
               .then(response => {
-                console.log(response.data)
                 this.relatorio_total = response.data.datos_relatorio
                 this.receita_l = response.data.receita_liquida
                 this.periodos = response.data.periodos

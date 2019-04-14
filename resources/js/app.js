@@ -30,6 +30,7 @@ Vue.use(AsyncComputed);
 import 'bootstrap-css-only/css/bootstrap.min.css'; 
 import 'mdbvue/build/css/mdb.css';
 
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -43,6 +44,7 @@ import 'mdbvue/build/css/mdb.css';
 
 Vue.component('example-component', require('./components/Home.vue').default);
 Vue.component('toolbar', require('./components/Toolbar.vue').default);
+Vue.component('pizza', require('./components/Pizza.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
