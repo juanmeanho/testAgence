@@ -106,7 +106,7 @@ class ConsultoresController extends Controller
                 $query = DB::table('cao_fatura')
                 ->join('cao_os', 'cao_fatura.co_os', '=', 'cao_os.co_os')
                 ->where('cao_os.co_usuario', '=', $consultores[$i]->co_usuario)
-                ->whereYear('cao_fatura.data_emissao', '2007')
+                ->whereYear('cao_fatura.data_emissao', $date_explode[0])
                 ->whereMonth('cao_fatura.data_emissao', $date_explode[1]);
 
                 $receita_liquida[$i][$j] = round($query->sum('cao_fatura.valor'), 2);
@@ -154,8 +154,8 @@ class ConsultoresController extends Controller
         $first_date = $periodos[0]->periodo_num.'-01';
         $last_date = $periodos[$position - 1]->periodo_num.'-'.$last_day;
 
-        $first_date = '2007-01-01';
-        $last_date = '2007-12-31';
+        //$first_date = '2007-01-01';
+        //$last_date = '2007-12-31';
 
         for($i=0; $i < count($consultores); $i++){
 
@@ -200,12 +200,12 @@ class ConsultoresController extends Controller
 
         $last_day = date("d",(mktime(0,0,0,$date_explode[1]+1,1,$date_explode[0])-1));
         
-        //$first_date = $periodos[0]->periodo_num.'-01';
-        //$last_date = $periodos[$position - 1]->periodo_num.'-'.$last_day;
+        $first_date = $periodos[0]->periodo_num.'-01';
+        $last_date = $periodos[$position - 1]->periodo_num.'-'.$last_day;
 
 
-        $first_date = '2007-01-01';
-        $last_date = '2007-12-31';
+        //$first_date = '2007-01-01';
+        //$last_date = '2007-12-31';
 
         for($i=0; $i < count($consultores); $i++){
 
