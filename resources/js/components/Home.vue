@@ -11,60 +11,65 @@
                   <v-icon left>mdi-calendar-clock</v-icon>Período de consulta
                 </v-chip>  
               </v-flex>
-              <v-flex xs2 align-start > <!-- Desde -->
-                    <v-menu
-                      :close-on-content-click="true"
-                      :nudge-right="40"
-                      lazy
-                      transition="scale-transition"
-                      offset-y
-                      full-width
-                      min-width="290px"
-                    >
-                      <template v-slot:activator="{ on }">
-                        <v-text-field
-                          v-model="date_desde"
-                          label="Desde"
-                          prepend-icon="event"
-                          readonly
-                          v-on="on"
-                          width="80px"
-
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker v-model="date_desde" type="month"></v-date-picker>
-                    </v-menu>
-              </v-flex>
-              <v-flex xs2 > <!-- Hasta -->
-                    <v-menu
-                      :close-on-content-click="true"
-                      :nudge-right="40"
-                      lazy
-                      transition="scale-transition"
-                      offset-y
-                      full-width
-                      min-width="290px"
-                    >
-                      <template v-slot:activator="{ on }">
-                        <v-text-field
-                          v-model="date_hasta"
-                          label="Hasta"
-                          prepend-icon="event"
-                          readonly
-                          v-on="on"
-                          width="80px"
-
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker v-model="date_hasta" type="month"></v-date-picker>
-
-                    </v-menu>
-              </v-flex>
             </v-card-title>
+            <v-container>
+              <v-layout row wrap>
+                <v-flex md3 xs10> <!-- Desde -->
+                      <v-menu
+                        :close-on-content-click="true"
+                        :nudge-right="40"
+                        lazy
+                        transition="scale-transition"
+                        offset-y
+                        full-width
+                        min-width="290px"
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="date_desde"
+                            label="Desde"
+                            prepend-icon="event"
+                            readonly
+                            v-on="on"
+                            width="80px"
+
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker v-model="date_desde" type="month"></v-date-picker>
+                      </v-menu>
+                </v-flex>
+                
+                <v-flex md3 xs10> <!-- Hasta -->
+                      <v-menu
+                        :close-on-content-click="true"
+                        :nudge-right="40"
+                        lazy
+                        transition="scale-transition"
+                        offset-y
+                        full-width
+                        min-width="290px"
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="date_hasta"
+                            label="Hasta"
+                            prepend-icon="event"
+                            readonly
+                            v-on="on"
+                            width="80px"
+
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker v-model="date_hasta" type="month"></v-date-picker>
+
+                      </v-menu>
+                </v-flex>
+              </v-layout>
+            </v-container>
             <template>
               <v-container fill-height fluid>
                 <v-layout row wrap>
-                  <v-flex xs5 sm5> <!-- Lista 1 -->
+                  <v-flex md5 xs12> <!-- Lista 1 -->
                     <v-card height="290px">
                       <v-toolbar color="indigo" dark height="40%">
                         <v-toolbar-title >Consultores ({{ consultores.length }})</v-toolbar-title>
@@ -90,7 +95,7 @@
                       </v-list>
                     </v-card>
                   </v-flex>
-                  <v-flex xs2 sm2> <!-- Botones de seleccion -->
+                  <v-flex md2 xs12> <!-- Botones de seleccion -->
                     <template><br><br>
                       <div class="text-xs-center mt-4" >
                         <v-btn color="indigo" dark @click="todosLeft()">
@@ -104,7 +109,7 @@
                       </div>
                     </template>
                   </v-flex>
-                  <v-flex xs5 sm5> <!-- Lista 2 -->
+                  <v-flex md5> <!-- Lista 2 -->
                     <v-card height="290px">
                       <v-toolbar color="indigo" dark height="40%">
                         <v-toolbar-title>Seleccionados ({{ consultores_seleccionados.length }})</v-toolbar-title>

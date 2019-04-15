@@ -95,7 +95,15 @@
 
                         },
                         options: {
-                          responsive: true
+                          responsive: true,
+                          scales: {
+                            yAxes: [{
+                              display:true,
+                              ticks: {
+                                max: 32000
+                              }
+                            }]
+                          }
                         }
                       }
                 this.createChart('grafico-chart', this.graficoChartData)
