@@ -106,7 +106,7 @@ class ConsultoresController extends Controller
                 $query = DB::table('cao_fatura')
                 ->join('cao_os', 'cao_fatura.co_os', '=', 'cao_os.co_os')
                 ->where('cao_os.co_usuario', '=', $consultores[$i]->co_usuario)
-                ->whereYear('cao_fatura.data_emissao', $date_explode[0])
+                ->whereYear('cao_fatura.data_emissao', '2007')
                 ->whereMonth('cao_fatura.data_emissao', $date_explode[1]);
 
                 $receita_liquida[$i][$j] = round($query->sum('cao_fatura.valor'), 2);
@@ -154,6 +154,9 @@ class ConsultoresController extends Controller
         $first_date = $periodos[0]->periodo_num.'-01';
         $last_date = $periodos[$position - 1]->periodo_num.'-'.$last_day;
 
+        $first_date = '2007-01-01';
+        $last_date = '2007-12-31';
+
         for($i=0; $i < count($consultores); $i++){
 
                 $query = DB::table('cao_fatura')
@@ -166,10 +169,8 @@ class ConsultoresController extends Controller
 
 
                 $total[$i] = $receita_liquida[$i] - $total_imp_inc[$i];
-                
 
         }
-
 
         $valor_total = array_sum($total);
 
@@ -185,6 +186,63 @@ class ConsultoresController extends Controller
         }
 
         return response()->json(['porcentaje'  => $porcentaje], 200);
+
+    }
+
+    public function get_grafico_data(Request $request)
+    {
+        $periodos = json_decode($request['periodos']);
+        $consultores = json_decode($request['consultores']);
+
+        $position = count($periodos);
+
+        $date_explode = explode('-', $periodos[$position - 1]->periodo_num);
+
+        $last_day = date("d",(mktime(0,0,0,$date_explode[1]+1,1,$date_explode[0])-1));
+        
+        //$first_date = $periodos[0]->periodo_num.'-01';
+        //$last_date = $periodos[$position - 1]->periodo_num.'-'.$last_day;
+
+
+        $first_date = '2007-01-01';
+        $last_date = '2007-12-31';
+
+        for($i=0; $i < count($consultores); $i++){
+
+                $custo[$i] = DB::table('cao_salario')
+                ->where('co_usuario', '=', $consultores[$i]->co_usuario)
+                ->first('brut_salario');
+
+                $query = DB::table('cao_fatura')
+                ->join('cao_os', 'cao_fatura.co_os', '=', 'cao_os.co_os')
+                ->where('cao_os.co_usuario', '=', $consultores[$i]->co_usuario)
+                ->whereBetween('cao_fatura.data_emissao', [$first_date, $last_date]);
+
+                $receita_liquida[$i] = round($query->sum('cao_fatura.valor'), 2);
+                $total_imp_inc[$i] = round($query->sum('cao_fatura.total_imp_inc')/100);
+
+
+                $total[$i] = $receita_liquida[$i] - $total_imp_inc[$i];
+                
+
+        }
+
+        $suma_custos = 0; 
+
+        for($i=0; $i < count($custo); $i++){
+            if($custo[$i] != NULL)
+                $custo_fixo[$i] = $custo[$i]->brut_salario;
+            else
+                $custo_fixo[$i] = 0;
+            $suma_custos = $suma_custos + $custo_fixo[$i];
+        }
+
+        for($i=0; $i < count($consultores); $i++){
+            $promedio_custo[$i] = round($suma_custos/count($consultores), 2);
+        }
+
+
+        return response()->json(['receitas'  => $total, 'promedio' => $promedio_custo], 200);
 
     }
 }

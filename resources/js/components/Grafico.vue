@@ -1,17 +1,18 @@
 <template>
   <v-flex xs12 lg12 sm12 offset-lg0 >
-    <v-card v-if="showChart==true">
+    <v-card v-if="showChartPie==true">
       <v-layout row> 
         <v-card-title>
           <div>
-            <h3 class="subheading "><v-icon color="indigo" left>mdi-chart-pie</v-icon>Gráfico Nº 2</h3>
+            <h3 class="subheading "><v-icon color="indigo" left>mdi-finance</v-icon>Gráfico Nº 1</h3>
           </div>
         </v-card-title>
-          <canvas id="planet-chart"></canvas>
+            <canvas id="grafico-chart"></canvas>
       </v-layout><!-- Fin Pizza-->
     </v-card>
   </v-flex>
 </template>
+
 
 <script>
     import Chart from 'chart.js'
@@ -22,10 +23,10 @@
         return {
           receita_liquida: [],
           porcentaje: [],
-          planetChartData: {},
+          graficoChartData: {},
           seleccionados: [],
           colors: [],
-          showChart: false,
+          showChartPie: false,
           periodos: null
         }
       },
@@ -33,19 +34,21 @@
         createChart(chartId, chartData) {
           const ctx = document.getElementById(chartId);
           const myChart = new Chart(ctx, {
-            type: this.planetChartData.type,
-            data: this.planetChartData.data,
-            options: this.planetChartData.options,
+            type: this.graficoChartData.type,
+            data: this.graficoChartData.data,
+            options: this.graficoChartData.options,
           });
         },
         async getPorcentaje(meses) {
           let res = await axios
-              .post('/pizza_data',{
+              .post('/grafico_data',{
                 consultores: JSON.stringify(this.consultores_seleccionados),
                 periodos: JSON.stringify(meses)
               })
               .then(response => {
-                this.porcentaje = response.data.porcentaje
+                this.porcentaje = response.data.receitas
+                this.promedio = response.data.promedio
+
               })
               .catch(error => {
                 console.log(error)
@@ -58,11 +61,11 @@
              var o = Math.round, r = Math.random, s = 255;
                 return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
           },
-          showPie(meses, showChart){
+          showBar(meses, showChartPie){
 
-            this.showChart = showChart
+            this.showChartPie = showChartPie
 
-            if(showChart){
+            if(showChartPie){
                 this.consultores_seleccionados.forEach(v => {
                   this.seleccionados.push(v.no_usuario)
                   this.colors.push(this.getRandomRgb())
@@ -72,25 +75,30 @@
                 this.getPorcentaje(meses)
                   .then(res => {
                   this.porcentaje = res
-                  this.planetChartData = {
-                        type: 'pie',
+                  this.graficoChartData = {
+                        type: 'bar',
+                        
                         data: {
-                          labels: this.seleccionados,
-                          datasets: [
-                            {
+                          datasets: [{
+                            label: 'Receitas',
                             data: this.porcentaje,
-                            backgroundColor: this.colors
-                        }
-                          ]
+                            backgroundColor: 'rgb(51, 85, 255)'
+
+                        },{
+                            label: 'Custo Fixo Médio',
+                            data: this.promedio,
+                            backgroundColor: 'rgb(255, 174, 0)',
+                            type: 'line'
+                            
+                        }],
+                        labels: this.seleccionados
+
                         },
                         options: {
-                          responsive: true,
-                          legend: {
-                            position: 'left'
-                          }
+                          responsive: true
                         }
                       }
-                this.createChart('planet-chart', this.planetChartData)
+                this.createChart('grafico-chart', this.graficoChartData)
 
                 this.porcentaje = []
                 this.colors = []

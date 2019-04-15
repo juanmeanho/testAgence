@@ -42,9 +42,10 @@ import 'mdbvue/build/css/mdb.css';
 // const files = require.context('./', true, /\.vue$/i);
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
 
-Vue.component('example-component', require('./components/Home.vue').default);
+Vue.component('home-component', require('./components/Home.vue').default);
 Vue.component('toolbar', require('./components/Toolbar.vue').default);
 Vue.component('pizza', require('./components/Pizza.vue').default);
+Vue.component('grafico', require('./components/Grafico.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

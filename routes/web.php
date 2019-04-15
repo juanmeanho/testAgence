@@ -18,3 +18,4 @@ Route::get('/', function () {
 Route::resource('consultores', 'ConsultoresController');
 Route::post('get_relatorio', 'ConsultoresController@get_relatorio');
 Route::post('pizza_data', 'ConsultoresController@get_pizza_data');
+Route::post('grafico_data', 'ConsultoresController@get_grafico_data');

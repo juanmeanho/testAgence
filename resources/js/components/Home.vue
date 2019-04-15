@@ -137,7 +137,7 @@
                   Relatorio
                 <v-icon right>mdi-clipboard-check-outline</v-icon>
               </v-btn>
-              <v-btn color="success" dark @click="">
+              <v-btn color="success" dark @click="showGrafico()">
                   Gráfico
                 <v-icon right>mdi-chart-areaspline</v-icon>
               </v-btn>
@@ -199,8 +199,8 @@
           </v-flex>
         </v-layout>
       </template><!-- Fin Tablas Tablas-->
-            <pizza :consultores_seleccionados="consultores_seleccionados" ref="pizza">
-            </pizza>
+            <pizza v-show="showPie" :consultores_seleccionados="consultores_seleccionados" ref="pizza"></pizza>
+            <grafico v-show="showBar" :consultores_seleccionados="consultores_seleccionados" ref="grafico"></grafico>
     </v-container>
   </div>
 
@@ -248,6 +248,7 @@
           custo_fixo: [],
           comissao: [],
           lucro: [],
+          showBar: ''
 
         }
       },
@@ -272,6 +273,39 @@
               else{
                   this.$refs.pizza.showPie(this.meses, true)
                   this.showTable = false
+                  this.showBar = false
+                  this.showPie = true
+              }
+            }else{
+              alert("Debe seleccionar un periodo de consulta")
+            }
+
+          }else
+            alert('Debe seleccionar un consultor')
+        },
+        showGrafico(){
+          this.meses = []
+          
+          if(this.consultores_seleccionados != 0){
+            if(this.date_desde != '' && this.date_hasta != ''){
+              var startDate = moment(this.date_desde);
+              var endDate = moment(this.date_hasta);
+
+              endDate.add(1,'month')
+
+              while (startDate.isBefore(endDate)) {
+                this.meses.push({'periodo_num' : startDate.format("YYYY-MM")});
+                startDate.add(1, 'month');
+              }
+              
+              if (endDate.isBefore(startDate)) {
+                  alert('La fecha final no puede ser mayor que la inicial')
+              }
+              else{
+                  this.$refs.grafico.showBar(this.meses, true)
+                  this.showTable = false
+                  this.showBar = true
+                  this.showPie = false
 
               }
             }else{
@@ -312,8 +346,7 @@
         showRelatorio(){
 
           this.meses = []
-          this.showPie = false
-          this.$refs.pizza.showPie(null, false)
+          
 
 
           if(this.consultores_seleccionados != 0){
@@ -350,9 +383,9 @@
                 console.log(error)
               })
 
-                if(this.showTable == false){
                   this.showTable = true
-                }
+                  this.showPie = false
+                  this.showBar = false
               }
             }
             else
