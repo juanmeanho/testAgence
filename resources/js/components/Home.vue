@@ -248,7 +248,8 @@
           custo_fixo: [],
           comissao: [],
           lucro: [],
-          showBar: ''
+          showBar: '',
+          showPie: ''
 
         }
       },
