@@ -20,6 +20,7 @@ class ConsultoresController extends Controller
         $consultores = DB::table('cao_usuario')
             ->join('permissao_sistema', 'cao_usuario.co_usuario', '=', 'permissao_sistema.co_usuario')
             ->where('permissao_sistema.co_sistema', '=', 1)
+            ->where('permissao_sistema.in_ativo', '=', 'S')
             ->whereIn('permissao_sistema.co_tipo_usuario', array(0, 1, 2))
             ->orderBy('no_usuario', 'ASC')
             ->get();
