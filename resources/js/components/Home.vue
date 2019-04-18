@@ -183,17 +183,17 @@
                   <tbody>
                   <tr v-for="(itemMes, i) in periodos" :key="i">
                     <td >{{ formatDate(itemMes.periodo_num) }}</td>
-                    <td align="right" > R$ {{ receita_l[index][i] }}</td>
-                    <td align="right" > R$ {{ custo_fixo[index][i] }}</td>
-                    <td align="right" > R$ {{ comissao[index][i] }}</td>
-                    <td align="right" > R$ {{ lucro[index][i] }}</td>
+                    <td align="right" > R$ {{ formatMoney(receita_l[index][i]) }}</td>
+                    <td align="right" > R$ {{ formatMoney(custo_fixo[index][i]) }}</td>
+                    <td align="right" > R$ {{ formatMoney(comissao[index][i]) }}</td>
+                    <td align="right" :style="getColor(lucro[index][i])"> R$ {{ formatMoney(lucro[index][i]) }}</td>
                   </tr>
                   <tr>
                     <td align="left">Totales</td>
-                    <td align="right">{{  suma(receita_l[index]) }}</td>
-                    <td align="right">{{  suma(custo_fixo[index]) }}</td>
-                    <td align="right">{{  suma(comissao[index]) }}</td>
-                    <td align="right">{{  suma(lucro[index]) }}</td>
+                    <td align="right">R$ {{   suma(receita_l[index]) }}</td>
+                    <td align="right">R$ {{   suma(custo_fixo[index]) }}</td>
+                    <td align="right">R$ {{   suma(comissao[index]) }}</td>
+                    <td align="right" :style="getColorTotal(lucro[index])">R$ {{   suma(lucro[index]) }}</td>
                   </tr>
                  </tbody>
                   <!--Table body-->
@@ -409,8 +409,31 @@
           function add(accumulator, a) {
               return parseFloat(accumulator) + parseFloat(a);
           }
+          let val = (sum/1).toFixed(2).replace('.', ',')
 
-          return sum.toFixed(2)
+          return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+        },
+        formatMoney(sum){
+            let val = (sum/1).toFixed(2).replace('.', ',')
+
+          return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+        },
+        getColor(valor){
+          if(valor < 0)
+            return 'color: red'
+        },
+        getColorTotal(valor){
+          console.log(valor)
+           const suma = valor.reduce(add);
+
+          function add(accumulator, a) {
+              return parseFloat(accumulator) + parseFloat(a);
+          }
+          if(suma < 0)
+            return 'color: red'
+          else
+            return 'color: blue'
+
         }
       }
     }

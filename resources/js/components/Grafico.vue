@@ -80,30 +80,31 @@
                         
                         data: {
                           datasets: [{
+                            label: 'Custo Fixo Médio',
+                            data: this.promedio,
+                            backgroundColor: 'rgb(255, 174, 0)',
+                            type: 'line',
+                            fill: false
+                            
+                        },{
                             label: 'Receitas',
                             data: this.porcentaje,
                             backgroundColor: 'rgb(51, 85, 255)'
 
-                        },{
-                            label: 'Custo Fixo Médio',
-                            data: this.promedio,
-                            backgroundColor: 'rgb(255, 174, 0)',
-                            type: 'line'
-                            
                         }],
                         labels: this.seleccionados
 
                         },
                         options: {
                           responsive: true,
-                          scales: {
+                          /*scales: {
                             yAxes: [{
                               display:true,
                               ticks: {
                                 max: 32000
                               }
                             }]
-                          }
+                          }*/
                         }
                       }
                 this.createChart('grafico-chart', this.graficoChartData)
