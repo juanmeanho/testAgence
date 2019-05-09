@@ -371,7 +371,6 @@
               if (endDate.isBefore(startDate)) {
                 alert('La fecha final no puede ser mayor que la inicial')
               }else{
-
                 axios
               .post('/get_relatorio',{
                 consultores: JSON.stringify(this.consultores_seleccionados),
